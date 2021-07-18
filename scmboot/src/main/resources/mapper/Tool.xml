@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.etong.pms.repository.ToolMapper">
+
+
+	<select id="getDataDicItem" resultType="java.util.HashMap">
+		SELECT
+		i.dataitemcode value,
+		i.dataitemname label
+		FROM
+		datadic d,
+		datadicitem i
+		WHERE
+		d.id = i.datadic_id
+		AND d.groupcode = #{groupCode}
+		and d.deleteflag <![CDATA[ <> ]]> '1'
+		and i.deleteflag <![CDATA[ <> ]]> '1'
+	</select>
+
+
+
+
+</mapper>

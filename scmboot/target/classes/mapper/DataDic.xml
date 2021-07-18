@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.etong.pms.repository.DataDicMapper">
+	<sql id="dataDicColumns">
+		id,
+		groupcode,
+		groupname,
+		groupdesc,
+		creuser_code creusercode,
+		DATE_FORMAT(cretime,'%Y-%m-%d %H:%i:%s') cretime,
+		upduser_code updusercode,
+		DATE_FORMAT(updtime,'%Y-%m-%d %H:%i:%s') updtime,
+		version
+	</sql>
+
+	<sql id="dataDicItemColumns">
+		id,
+		datadic_id,
+		dataitemcode,
+		dataitemname,
+		dataitemdesc,
+		creuser_code creusercode,
+		DATE_FORMAT(cretime,'%Y-%m-%d %H:%i:%s') cretime,
+		upduser_code updusercode,
+		DATE_FORMAT(updtime,'%Y-%m-%d %H:%i:%s') updtime,
+		version
+	</sql>
+	<insert id="insertDataDic">
+		insert into datadic(
+			groupcode,
+			groupname,
+			groupdesc,
+			creuser_code,
+			cretime
+		) values (
+			#{groupCode},
+			#{groupName},
+			#{groupDesc},
+			#{creUserCode},
+			now()
+		)
+	</insert>
+	<insert id="insertDataDicItem">
+		insert into datadicitem(
+			datadic_id,
+			dataitemcode,
+			dataitemname,
+			dataitemdesc,
+			creuser_code,
+			cretime
+		) values (
+			#{dataDicId},
+			#{dataItemCode},
+			#{dataItemName},
+			#{dataItemDesc},
+			#{creUserCode},
+			now()
+		)
+	</insert>
+	<update id="updateDataDic">
+		UPDATE datadic
+		SET groupname = #{groupName},
+		<if test="groupDesc != null">
+			groupdesc = #{groupDesc},
+		</if>
+		upduser_code = #{updUserCode},
+		updtime = now( ),
+		version = (version + 1) mod 999
+		WHERE
+			id = #{id}
+			AND version = #{version}
+	</update>
+
+	<update id="updateDataDicItem">
+		UPDATE datadicitem
+		SET dataitemname = #{dataItemName},
+		<if test="dataItemDesc != null">
+			dataitemdesc = #{dataItemDesc},
+		</if>
+		upduser_code = #{updUserCode},
+		updtime = now( ),
+		version = (version + 1) mod 999
+		WHERE
+			id = #{id}
+			AND version = #{version}
+	</update>
+
+	<select id="getDataDics" resultType="com.etong.pms.domain.DataDic">
+		SELECT
+			<include refid="dataDicColumns"></include>
+		FROM
+			datadic
+		WHERE
+			deleteflag = '0'
+		<if test="groupCode != null and groupCode != ''">
+			AND groupcode = #{groupCode}
+		</if>
+		<if test="groupName != null and groupName != ''">
+			AND groupname LIKE '%${groupName}%'
+		</if>
+		order by groupcode
+	</select>
+
+	<select id="getDataDicDetail" resultType="com.etong.pms.domain.DataDicDetail">
+		SELECT
+			<include refid="dataDicColumns"></include>
+		FROM
+		datadic
+		WHERE
+		deleteflag = '0'
+		AND id = #{id}
+	</select>
+
+	<select id="getDataDicItems" resultType="com.etong.pms.domain.DataDicItem">
+		SELECT
+			<include refid="dataDicItemColumns"></include>
+		FROM
+			datadicitem
+		WHERE
+			deleteflag = '0'
+		<if test="dataDicId != null">
+			AND datadic_id = #{dataDicId}
+		</if>
+		<if test="dataItemCode != null">
+			AND dataitemcode = #{dataItemCode}
+		</if>
+		order by dataitemcode
+	</select>
+
+	<delete id="delDataDicById">
+		delete from datadic where id = #{dataDicId}
+	</delete>
+
+	<delete id="delDataDicItemById">
+		delete from datadicitem where id = #{dataItemDicId}
+	</delete>
+
+</mapper>

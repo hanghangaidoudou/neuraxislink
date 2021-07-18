@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.etong.pms.repository.UserMapper">
+
+
+
+  <select id="checkUser" resultType="java.lang.Integer">
+		SELECT
+			count( 1 ) count
+		FROM
+		users
+		WHERE
+			usercode = #{userCode}
+			AND PASSWORD = #{password}
+			AND deleteflag <![CDATA[ <> ]]> 1
+	</select>
+
+
+  <select id="getUserInfo" resultType="com.etong.pms.model.dto.UserInfo">
+		SELECT
+			a.id,
+			a.usercode,
+			a.username,
+			a.roles,
+			a.dept_id deptid,
+			b.code deptcode,
+			b.name deptname
+		FROM
+			users a
+			LEFT JOIN dept b ON a.dept_id = b.id
+		WHERE
+			a.usercode = #{userCode}
+			and a.state = '0'
+			and a.deleteflag <![CDATA[ <> ]]> 1
+  </select>
+
+  <select id="getUserInfos" resultType="com.etong.pms.model.dto.UserInfo">
+    SELECT
+    a.id,
+    a.usercode,
+    a.username,
+    a.roles,
+    a.tel,
+    a.email,
+    CASE
+    WHEN a.sex = 0 THEN
+    '男'
+    ELSE
+    '女'
+    END sex,
+    a.dept_id deptid,
+    b.code deptcode,
+    b.name deptname,
+    a.team_id teamid,
+    c.code teamcode,
+    c.name teamname,
+    CASE
+    WHEN a.state = 0 THEN
+    '在职'
+    ELSE
+    '离职'
+    END state,
+    DATE_FORMAT(a.entrydate,'%Y-%m-%d') entrydate,
+    DATE_FORMAT(a.leavedate,'%Y-%m-%d') leavedate,
+    DATE_FORMAT(a.cretime,'%Y-%m-%d %H:%i:%s') cretime,
+    a.upduser_code updusercode,
+    DATE_FORMAT(a.updtime,'%Y-%m-%d %H:%i:%s') updtime,
+    a.version,
+    a.deleteflag
+    FROM
+    users a
+    LEFT JOIN dept b ON a.dept_id = b.id
+    LEFT JOIN team c ON a.team_id = c.id
+    WHERE
+    a.deleteflag <![CDATA[ <> ]]> 1
+    <if test="userCode != null and userCode != ''">
+      AND a.usercode = #{userCode}
+    </if>
+    <if test="userName != null and userName != ''">
+      AND a.username like '%${userName}%'
+    </if>
+    <if test="deptId != null and deptId != ''">
+      AND a.dept_id = #{deptId}
+    </if>
+    <if test="teamId != null and teamId != ''">
+      AND a.team_id = #{teamId}
+    </if>
+    <if test="state != null">
+      AND a.state = #{state}
+    </if>
+    ORDER BY a.usercode
+  </select>
+
+  <select id="getUserInfoById" resultType="com.etong.pms.model.dto.UserInfo">
+    SELECT
+      id,
+      usercode,
+      username,
+      roles,
+      tel,
+      email,
+      sex,
+      dept_id deptid,
+      team_id teamid,
+      state,
+      DATE_FORMAT(entrydate,'%Y-%m-%d') entrydate
+    FROM
+      users
+    WHERE
+      id = #{id}
+  </select>
+
+  <insert id="istUser">
+		INSERT INTO users ( usercode, username, password, roles, tel,email, sex, dept_id, team_id,
+		state, entrydate, creuser_code, cretime )
+		VALUES
+		(
+		#{userCode},
+		#{userName},
+		#{password},
+		#{roles},
+		#{tel},
+    #{email},
+		#{sex},
+		#{deptId},
+		#{teamId},
+		#{state},
+		now( ),
+		#{creUserCode},
+		now( )
+		)
+	</insert>
+
+  <update id="updUser" parameterType="com.etong.pms.domain.User">
+    UPDATE users
+      SET
+      username = #{userName},
+      roles = #{roles},
+      tel = #{tel},
+      email = #{email},
+      sex = #{sex},
+      dept_id = #{deptId},
+      team_id = #{teamId},
+      state = #{state},
+      entrydate = #{entryDate},
+      <if test=" state!= null and state == '1'.toString()" >
+        leavedate = now(),
+      </if>
+      <if test=" state!= null and state == '0'.toString()" >
+        leavedate = null,
+      </if>
+      upduser_code = #{updUserCode},
+      updtime = now( ),
+      version = ( version + 1 ) MOD 999
+    WHERE
+      id = #{id}
+  </update>
+
+
+  <update id="resetPassword">
+    UPDATE users
+      SET password = #{password}
+    WHERE
+      usercode = #{userCode};
+  </update>
+
+  <update id="updUserBySelf">
+    update users set username = #{userName},
+    tel = #{tel},
+    email = #{email},
+    sex = #{sex},
+    upduser_code = #{updUserCode},
+    updtime = now( ),
+    version = ( version + 1 ) MOD 999
+    where id = #{id}
+
+  </update>
+
+  <select id="checkOldPassword" resultType="java.lang.Integer">
+    SELECT
+      count( 1 )
+    FROM
+      users
+    WHERE
+      usercode = #{userCode}
+      AND password = #{password}
+  </select>
+
+  <select id="checkUserCode" resultType="java.lang.Integer">
+    SELECT
+      count( 1 )
+    FROM
+      users
+    WHERE
+      usercode = #{userCode}
+  </select>
+
+</mapper>

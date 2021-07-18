@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.etong.pms.repository.DeptMapper">
+
+
+
+	<select id="getDept" resultType="com.etong.pms.domain.Dept">
+		select `id`,`code`,`name`,`desc`,
+		DATE_FORMAT(`cretime`,'%Y-%m-%d %H:%i:%s') cretime,
+		`upduser_code` updusercode,
+		DATE_FORMAT(`updtime`,'%Y-%m-%d %H:%i:%s') updtime,
+		`version`,
+		`deleteflag`
+		 from dept where 1=1
+		<if test="id != null">
+			and id = #{id}
+		</if>
+		<if test="code != null and code != ''">
+			and code = #{code}
+		</if>
+		<if test="name != null and name != ''">
+			and name like '%${name}%'
+		</if>
+		order by code
+	</select>
+
+	<select id="getTeam" resultType="com.etong.pms.domain.Team">
+		select `id` ,`code`,`name`,`desc`,`dept_id` deptid ,
+		DATE_FORMAT(`cretime`,'%Y-%m-%d %H:%i:%s') cretime,
+		`upduser_code` updusercode,
+		DATE_FORMAT(`updtime`,'%Y-%m-%d %H:%i:%s') updtime,
+		`version`,
+		`deleteflag`
+		 from team where dept_id = #{id}
+	</select>
+
+  <select id="getDeptDetail" resultType="com.etong.pms.domain.DeptDetail">
+    select `id`,`code`,`name`,`desc`,
+    DATE_FORMAT(`cretime`,'%Y-%m-%d %H:%i:%s') cretime,
+    `upduser_code` updusercode,
+    DATE_FORMAT(`updtime`,'%Y-%m-%d %H:%i:%s') updtime,
+    `version`,
+    `deleteflag`
+    from dept where 1=1
+    <if test="deptId != null">
+      and id = #{deptId}
+    </if>
+  </select>
+
+  <insert id="istDept">
+		insert into dept(`code`,`name`,`desc`,`creuser_code`,`cretime`) values(
+		#{code},
+		#{name},
+		#{desc},
+		#{creUserCode},
+		now()
+		)
+	</insert>
+
+	<update id="updDept">
+		UPDATE dept
+		SET `code` = #{code},
+		`name` = #{name},
+		`desc` = #{desc},
+		`upduser_code` = #{updUserCode},
+		`updtime` = now( ),
+		`version` = ( version + 1 ) MOD 999
+		WHERE
+			id = #{id}
+	</update>
+
+	<delete id="delDept">
+		delete from dept where id = #{deptId}
+	</delete>
+
+	<insert id="istTeam">
+		INSERT INTO team ( `code`, `name`, `desc`, `dept_id`, `creuser_code`, `cretime` )
+		VALUES
+			(
+				#{code},#{name},#{desc},#{deptId},#{creUserCode},now()
+			)
+	</insert>
+
+	<update id="updTeam">
+		UPDATE team
+		SET `code` = #{code},
+		`name` = #{name},
+		`desc` = #{desc},
+		`upduser_code` = #{updUserCode},
+		`updtime` = now( ),
+		`version` = ( version + 1 ) MOD 999
+		WHERE
+			id = #{id}
+	</update>
+
+	<delete id="delTeam">
+		delete from team where id = #{teamId}
+	</delete>
+
+</mapper>
